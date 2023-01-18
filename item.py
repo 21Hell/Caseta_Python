@@ -4,13 +4,24 @@ import datetime
 
 
 class Item:
-    def __init__(self, nombre, codigo, estado, tipo, cantidad_prestado):
+    def __init__(self, nombre, codigo, estado, tipo):
         self.nombre = nombre
         self.codigo = codigo
         #Estados: Prestado, Disponible, Dañado
         self.estado = estado
         self.tipo = tipo
-        self.cantidad_prestado = cantidad_prestado
+    
+    def agregar_item(self, nombre, codigo, estado, tipo):
+        self.nombre = nombre
+        self.codigo = codigo
+        self.estado = estado
+        self.tipo = tipo
+
+        #Agregar al csv
+        with open('inventario.csv', 'a') as file:
+            file.write(f"{self.nombre},{self.codigo},{self.estado},{self.tipo} \n")
+
+        print(f"Item Agregado: {self.nombre} - {self.codigo} - {self.estado} - {self.tipo}")
 
 class Ticket:
     # Usuario del Ticket

@@ -7,91 +7,170 @@ import random
 sg.theme('DarkAmber')   # Add a touch of color
 
 
-
-# Generador de Codigo de Barras Layout
-
-layoutBarcode = [[sg.Text('Generador de Codigo de Barras', size=(30, 1), justification='center', font=("Helvetica", 25))],
-[sg.Text('Nombre del item', size=(30, 1), justification='center', font=("Helvetica", 15))],
-[sg.InputText()],
-[sg.Text('Tipo del item', size=(30, 1), justification='center', font=("Helvetica", 15))],
-[sg.InputText()],
-[sg.Text('Codigo', size=(30, 1), justification='center', font=("Helvetica", 15))],
-[sg.InputText(str(random.randint(1000000000000, 9999999999999)))],
-[sg.Button('Generar Codigo', size=(30, 2), font=("Helvetica", 15))],
-[sg.Button('Return', size=(30, 2), font=("Helvetica", 15))]]
-
-# Ticket generator
-
-layoutTicket = []
-# Ticket Deleter
-
-layoutDelete = []
-
-# show all open tickets
-
-layoutShow = []
-
-# Main layout
-
-layoutMain = [[sg.Text('Generador de Codigo de Barras', size=(30, 1), justification='center', font=("Helvetica", 25))],
-[sg.Button('Generar Codigo de Barras', size=(30, 2), font=("Helvetica", 15))],
-[sg.Button('Generar Ticket', size=(30, 2), font=("Helvetica", 15))],
-[sg.Button('Cerrar Ticket', size=(30, 2), font=("Helvetica", 15))],
-[sg.Button('Mostrar Tickets Abiertos', size=(30, 2), font=("Helvetica", 15))],
-[sg.Button('Salir', size=(30, 2), font=("Helvetica", 15))]]
-
-# Create the window
-
-window = sg.Window('Generador de Codigo de Barras', layoutMain, size=(600, 600), element_justification='center')
+layoutPrincipal = [
+    [sg.Text('App Caseta')],
+    # Agregar Item al Inventario con Código de Barras
+    [sg.Button('Agregar Item', key='-AGREGAR-', size=(60, 5),)],
+    # Ver Inventario
+    [sg.Button('Ver Inventario', key='-INVENTARIO-', size=(60, 5))],
+    # Generar Ticket
+    [sg.Button('Generar Ticket', key='-TICKET-', size=(60, 5))],
+    # Salir
+    [sg.Button('Salir', key='-SALIR-', size=(60, 5))]
+]
+VentanaPrincipal = sg.Window('App Caseta', layoutPrincipal, modal=True)
 
 
-# Event Loop to process "events" and get the "values" of the inputs
+def VentanaAgregar():
+    layoutAgregar = [
+        [sg.Text('Agregar Item')],
+        [sg.Text('Nombre: '), sg.Input(key='-NOMBRE-')],
+        # Código de Barras generado automáticamente
+        [sg.Text('Código de Barras: '), sg.Input(key='-BARRA-',
+                                                 default_text=random.randint(1000000000000, 9999999999999))],
+        # Descrición del Item
+        [sg.Text('Descripción: '), sg.Input(key='-DESCRIPCION-')],
+        # Estado del Item (Ej: Prestado, Disponible, Dañado)
+        [sg.Text('Estado: '), sg.Listbox(values=('Disponible', 'Dañado', 'Prestado'), size=(
+            20, 3), key='-ESTADO-', default_values=['Disponible'])],
+        [sg.Button('Agregar', key='-AGREGAR-'),
+         sg.Button('Cancelar', key='-CANCELAR-')]
+    ]
+    VentanaAgregar = sg.Window('Agregar Item', layoutAgregar, modal=True)
+    while True:
+        event, values = VentanaAgregar.read()
+        if event == sg.WIN_CLOSED or event == '-CANCELAR-':
+            break
+        elif event == '-AGREGAR-':
+            nombre = values['-NOMBRE-']
+            codigo = values['-BARRA-']
+            # Descripcion o Tipo de Item (Ej: Material,Herramienta etc)
+            descripcion_tipo = values['-DESCRIPCION-']
+            # Estado del Item (Ej: Prestado, Disponible, Dañado)
+            estado = values['-ESTADO-']
+            estado = estado[0]
+            cb.generar_codigo_barras(codigo, nombre)
+            Ojeto = item.Item(nombre, codigo, estado, descripcion_tipo)
+            Ojeto.agregar_item(nombre, codigo, estado, descripcion_tipo)
+            sg.popup('Item Agregado')
+            break
+
+
+def ObtenerInventario():
+    # Obtener el Inventario del csv
+    items = []
+    open('inventario.csv', 'r')
+    for line in open('inventario.csv', 'r'):
+        line = line.strip()
+        line = line.split(',')
+        items.append(line)
+    return items
+
+
+def VentanaInventario():
+    items = ObtenerInventario()
+    nombresItems = []
+    estadosItems = []
+    tiposItems = []
+    codigoItems = []
+    for item in items:
+        nombresItems.append(item[0])
+        codigoItems.append(item[1])
+        estadosItems.append(item[2])
+        tiposItems.append(item[3])
+    Ojetos = []
+    for i in range(len(nombresItems)):
+        Ojetos.append(
+            f'Nombre: {nombresItems[i]} | Estado: {estadosItems[i]} | Tipo: {tiposItems[i]} | Código: {codigoItems[i]}')
+    layoutInventario = [
+        [sg.Text('Inventario')],
+        [sg.Listbox(values=Ojetos, size=(60, 10), key='-INVENTARIO-')],
+        [sg.Button('Salir', key='-SALIR-')]
+    ]
+    VentanaInventario = sg.Window('Inventario', layoutInventario, modal=True)
+    while True:
+        event, values = VentanaInventario.read()
+        if event == sg.WIN_CLOSED or event == '-SALIR-':
+            break
+
+
+def FormateoBonito(items):
+    nombresItems = []
+    estadosItems = []
+    tiposItems = []
+    codigoItems = []
+    for item in items:
+        nombresItems.append(item[0])
+        codigoItems.append(item[1])
+        estadosItems.append(item[2])
+        tiposItems.append(item[3])
+    Ojetos = []
+    for i in range(len(nombresItems)):
+        Ojetos.append(
+            f'Nombre: {nombresItems[i]} | Estado: {estadosItems[i]} | Tipo: {tiposItems[i]} | Código: {codigoItems[i]}')
+    return Ojetos
 
 
 
 
+def VentanaTicket():
+    # Crearemos un ticket con los items que se encuentren en el inventario
+    items = ObtenerInventario()
+    nombresItems = []
+    estadosItems = []
+    tiposItems = []
+    codigoItems = []
+    for item in items:
+        nombresItems.append(item[0])
+        codigoItems.append(item[1])
+        estadosItems.append(item[2])
+        tiposItems.append(item[3])
+    OjetosInventario = []
+    OjetosCarrito = []
+    
+    ObjetosBonitos = FormateoBonito(items)
 
 
+    layoutTicket = [
+        [sg.Text('Ticket')],
+        # barra de busqueda
+        [sg.Text('Buscar: '), sg.Input(key='-BUSCAR-')],
+        # On duble click se agrega al carrito
+        [sg.Listbox(values=ObjetosBonitos, size=(60, 10), key='-INVENTARIO-')],
+        # Carrito de compras
+        [sg.Text('Carrito de Compras')],
+        [sg.Listbox(values=[], size=(60, 10), key='-CARRITO-')],
+        # Botones
+        [sg.Button('Agregar al Carrito', key='-AGREGAR-'),
+            sg.Button('Quitar del Carrito', key='-QUITAR-')],
+        [sg.Button('Generar Ticket', key='-GENERAR-'),
+            sg.Button('Cancelar', key='-CANCELAR-')],
+        [sg.Button('Salir', key='-SALIR-')]
+    ]
+    VentanaTicket = sg.Window('Ticket', layoutTicket, modal=True)
+
+    while True:
+        event, values = VentanaTicket.read()
+        if event == sg.WIN_CLOSED or event == '-SALIR-':
+            break
+        elif event == '-AGREGAR-':
+            # Del Arrerlo de objetos del inventario de aquel que se selecciono se agrega al carrito
+            item = values['-INVENTARIO-']
+            OjetosCarrito = OjetosCarrito.append(item)
+            # Se actualiza el estado del item en el inventario pero no se elimina
 
 
-
+            VentanaTicket.update()
 
 
 
 while True:
-
-    event, values = window.read()
-
-    if event in (None, 'Exit'):
+    event, values = VentanaPrincipal.read()
+    if event == sg.WIN_CLOSED or event == '-SALIR-':
         break
-
-
-    if event == 'Generar Codigo de Barras':
-        window = sg.Window('Generador de Codigo de Barras', layoutBarcode, size=(500, 500), element_justification='center')
-    elif event == 'Generar Ticket':
-        window.close()
-        window = sg.Window('Generador de Codigo de Barras', layoutTicket, size=(500, 500), element_justification='center')
-    elif event == 'Cerrar Ticket':
-        window.close()
-        window = sg.Window('Generador de Codigo de Barras', layoutDelete, size=(500, 500), element_justification='center')
-    elif event == 'Mostrar Tickets Abiertos':
-        window.close()
-        window = sg.Window('Generador de Codigo de Barras', layoutShow, size=(500, 500), element_justification='center')
-    
-    
-    
-    elif event == 'Generar Codigo':
-        print(values[0])
-        print(values[1])
-        print(values[2])
-
-
-    
-    elif event == 'Return':
-        window.close()
-        window = sg.Window('Generador de Codigo de Barras', layoutMain, size=(600, 600), element_justification='center')
-    else:
-        window.close()
-        break
-
-
+    elif event == '-AGREGAR-':
+        VentanaAgregar()
+    elif event == '-INVENTARIO-':
+        VentanaInventario()
+    elif event == '-TICKET-':
+        VentanaTicket()
