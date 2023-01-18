@@ -5,7 +5,7 @@ import treepoem
 
 def generar_codigo_barras(codigo, nombre_archivo):
     barcode = treepoem.generate_barcode(
-        barcode_type='code128',
+        barcode_type='ean13',
         data=codigo,
         # include_text and guardwhitespace
         options=dict(includetext=True)
