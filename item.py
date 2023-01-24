@@ -74,11 +74,13 @@ class Ticket:
     # Fecha de apertura del ticket
     # Abirto o cerrado
     # Lista de Items
-    def __init__(self, usuario, fecha, estado, items):
+    def __init__(self, usuario, fecha, estado, items,extras, id):
         self.usuario = usuario
         self.fecha = fecha
         self.estado = estado
         self.items = items
+        self.extras = extras
+        self.id = 0
     
     def agregar_item(self, item):
         self.items.append(item)
@@ -132,19 +134,21 @@ class TicketManager:
         print("Guardando Tickets")
         with open('Tickets.csv', 'w') as file:
             for ticket in self.tickets:
-                file.write(f"{ticket.usuario},{ticket.fecha},{ticket.estado},{ticket.items} \n")
+                file.write(f"{ticket.usuario},{ticket.fecha},{ticket.estado},{ticket.items},{ticket.extras},{ticket.id} \n")
     def cambiar_estado(self, ticket, estado):
         ticket.estado = estado
 
+    def cargar_tickets(self):
+        print("Cargando Tickets")
+        with open('Tickets.csv', 'r') as file:
+            for line in file:
+                line = line.strip()
+                usuario, fecha, estado, items, extras, ident = line.split(',')
+                #     def __init__(self, usuario, fecha, estado, items,extras, id):
+                ticket = Ticket(usuario, fecha, estado, items, extras, ident)
+
+    def actualizar_tickets(self):
+        self.tickets = []
+        self.cargar_tickets()
+
     
-
-item_manager = ItemManager()
-item_manager.cargar_items()
-
-# Cambiar estado de un item
-item = item_manager.items[0]
-item_manager.cambiar_estado(item, "Prestado")
-
-
-
-print(item_manager.mostrar_items())

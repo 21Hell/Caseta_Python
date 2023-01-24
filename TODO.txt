@@ -1,3 +1,4 @@
 
-Asignar ticket a usuario
+
 Cerrar ticket
+Editar ticket exitosamente

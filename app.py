@@ -113,18 +113,6 @@ def VentanaInventario():
 
 
 
-def VentanaTicketsAbiertos():
-    tickets = Obtener("Tickets")
-    layoutTickets = [
-        [sg.Text('Tickets')],
-        [sg.Listbox(values=tickets, size=(60, 10), key='-TICKETS-')],
-        [sg.Button('Salir', key='-SALIR-')]
-    ]
-    VentanaTickets = sg.Window('Tickets', layoutTickets, modal=True)
-    while True:
-        event, values = VentanaTickets.read()
-        if event == sg.WIN_CLOSED or event == '-SALIR-':
-            break
 
 
 
@@ -137,17 +125,8 @@ def VentanaTicket():
     # Crearemos un ticket con los items que se encuentren en el inventario
     
     item_manager.cargar_items()
-
-
-
-
     OjetosInventario = []
     OjetosCarrito = []
-    #   def mostrar_items(self):
-    #table = ''
-    #for item in self.items:
-    #    table += f"Item: {item.nombre} - {item.codigo} - {item.estado} - {item.tipo} \n"
-    #return table
 
     for item in item_manager.items:
         OjetosInventario.append(
@@ -220,15 +199,11 @@ def VentanaTicket():
             else:
                 # Validar que el numero de control sea valido
                 if ValidarControl(values['-CONTROL-']):
-                    # Generar el ticket de item
-                    # 
-                    #         self.usuario = usuario
-                    #         self.fecha = fecha
-                    #         self.estado = estado
-                    #         self.items = items 
-                    # Crear un objeto ticket y guardarlo con el ticket
-                
-                    ticket = it.Ticket(values['-CONTROL-'], datetime.datetime.now(), 'Abierto', OjetosCarrito)
+
+                    #     def __init__(self, usuario, fecha, estado, items,extras, id):
+
+                    ticket = it.Ticket(values['-CONTROL-'], datetime.date, 'Pendiente', OjetosCarrito, values['-EXTRAS-'], random.randint(0, 999999999))
+                    print(ticket)
                     ticket_manager.agregar_ticket(ticket)
 
                     # Item a cambiar de estado
@@ -241,7 +216,7 @@ def VentanaTicket():
                         print(ObjetoAEditar)
                         item_manager.cambiar_estado(ObjetoAEditar, 'Prestado')
 
-                    print(item_manager.mostrar_items())
+                    print(ticket_manager.tickets)
 
 
 
@@ -310,11 +285,12 @@ def VentanaTicket():
             
             # Determina si el codigo esta en el inventario y asigna el item a itemGuardar
             itemGuardar = ''
-            for item in items:
-                if codigo == item[1]:
+            for item in OjetosInventario:
+                if codigo in item:
                     itemGuardar = item
                     break
-            
+
+
             # Si el item esta en el inventario agregarlo al carrito
             if itemGuardar != '':
                 # Usamos el for para que el item se agregue al carrito
@@ -380,9 +356,71 @@ def VentanaUsuario():
             break
         
 
+def VentanaTicketsAbiertos():
+    # Muestra los tickets abiertos
+    ticket_manager.actualizar_tickets()
+    ticketsAbiertos = []
+    for ticket in ticket_manager.tickets:
+        if ticket.estado == 'Abierto':
+            ticketsAbiertos.append( f"Ticket {ticket.usuario} - {ticket.fecha} {ticket.estado} - {ticket.items}")
+
+    layoutTicketsAbiertos = [
+        [sg.Text('Tickets Abiertos', font='Any 15')],
+        [sg.Listbox(values=ticketsAbiertos, size=(50, 10), key='-TICKETS-')],
+        [sg.Button('Seleccionar', key='-SELECCIONAR-'), sg.Button('Cancelar', key='-CANCELAR-')]
+    ]
+    VentanaTicketsAbiertos = sg.Window('Tickets Abiertos', layoutTicketsAbiertos, modal=True)
+
+    while True:
+        event, values = VentanaTicketsAbiertos.read()
+        if event == sg.WIN_CLOSED or event == '-CANCELAR-':
+            break
+        elif event == '-SELECCIONAR-':
+            # Selecciona el ticket y lo muestra en la ventana de ticket
+            ticketSeleccionado = values['-TICKETS-']
+            # ["Ticket 123 - 2023-01-23 18:48:48.496675 Abierto - ['Nombre: MultímetroC03 | Estado: Disponible | Tipo: Material | Código: 162738294105']"]
+            # Selecciona el numero de ticket
+            VentanaTicketEdit(ticketSeleccionado)
+            VentanaTicketsAbiertos.close()
+            break
 
 
 
+def VentanaTicketEdit(ticketSeleccionado):
+    # Muestra la info de un ticket para poder modificarlo
+    print(ticketSeleccionado)
+    objectoTicket = ticket_manager.mostrar_ticket(ticketSeleccionado)
+
+
+    objetosEnTicket = objectoTicket[3].split(',')
+    layoutTicket = [
+        [sg.Text('Ticket', font='Any 15')],
+        [sg.Text('Usuario: '), sg.Text(objectoTicket[0])],
+        [sg.Text('Fecha: '), sg.Text(objectoTicket[1])],
+        [sg.Text('Estado: '), sg.Text(objectoTicket[2])],
+        [sg.Text('Objetos: '), sg.Listbox(objetosEnTicket, size=(50, 20), key='-OBJETOS-')],
+        [sg.Text('Extras: '), sg.Text(objectoTicket[4])],
+        [sg.Button('Cerrar Ticket', key='-CERRAR-'), sg.Button('Cancelar', key='-CANCELAR-')]
+        #Introductir el codigo de barras para borrar objetos del ticket
+        [sg.Text('Codigo de Barras: '), sg.Input(key='-CODIGO-')],
+        [sg.Button('Borrar Objeto', key='-BORRAR-')]
+    ]
+
+    VentanaTicket = sg.Window('Ticket', layoutTicket, modal=True)
+
+    while True:
+        event, values = VentanaTicket.read()
+        if event == sg.WIN_CLOSED or event == '-CANCELAR-':
+            break
+        elif event == '-CERRAR-':
+            # Cierra el ticket
+            ticket_manager.cerrar_ticket(ticketSeleccionado)
+            VentanaTicket.close()
+            break
+        elif event == '-BORRAR-':
+            # Borrar el objeto del ticket seleccionado
+            ObjetoSeleccionado = values['-OBJETOS-']
+            break
 
 while True:
     event, values = VentanaPrincipal.read()
