@@ -230,18 +230,19 @@ def VentanaTicket():
                 
                     ticket = it.Ticket(values['-CONTROL-'], datetime.datetime.now(), 'Abierto', OjetosCarrito)
                     ticket_manager.agregar_ticket(ticket)
-                    # Actualizar el inventario usando los manejadores
+
+                    # Item a cambiar de estado
+                    for item in OjetosCarrito:
+                        codigo = item.split('|')[3].strip()
+                        # Get only the digits at the end not the Codigo: part
+                        codigo = ''.join(filter(str.isdigit, codigo))
+                        print(codigo)
+                        ObjetoAEditar = item_manager.getItemfromCode(codigo)
+                        print(ObjetoAEditar)
+                        item_manager.cambiar_estado(ObjetoAEditar, 'Prestado')
+
                     print(item_manager.mostrar_items())
-                    items_a_actualizar = OjetosCarrito
-                    for item in items_a_actualizar:
-                        # Actualizar el estado de los 
-                        # Convertir el item a un objeto Item
-                        item = it.Item(item[0], item[1], item[2], item[3])
-                        item_manager.cambiar_estado(item, 'Prestado')
-                        print(item.estado)
-                        item_manager.actualizar_item(item, item.nombre, item.estado, item.tipo, item.codigo)
-                        item_manager.guardar_items()
-                        print(item_manager.mostrar_items())
+
 
 
 

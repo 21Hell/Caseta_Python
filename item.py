@@ -47,13 +47,18 @@ class ItemManager:
         self.cargar_items()
 
     def mostrar_items(self):
+        #mostar Estado de los items
         table = ''
         for item in self.items:
             table += f"Item: {item.nombre} - {item.codigo} - {item.estado} - {item.tipo} \n"
         return table
-    
 
-
+    def getItemfromCode(self, code):
+        for item in self.items:
+            if item.codigo == code:
+                print("Item encontrado")
+                return item
+        return None
 
     def cargar_items(self):
         print("Cargando Items")
@@ -130,3 +135,16 @@ class TicketManager:
                 file.write(f"{ticket.usuario},{ticket.fecha},{ticket.estado},{ticket.items} \n")
     def cambiar_estado(self, ticket, estado):
         ticket.estado = estado
+
+    
+
+item_manager = ItemManager()
+item_manager.cargar_items()
+
+# Cambiar estado de un item
+item = item_manager.items[0]
+item_manager.cambiar_estado(item, "Prestado")
+
+
+
+print(item_manager.mostrar_items())
