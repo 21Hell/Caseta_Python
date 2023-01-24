@@ -202,7 +202,7 @@ def VentanaTicket():
 
                     #     def __init__(self, usuario, fecha, estado, items,extras, id):
 
-                    ticket = it.Ticket(values['-CONTROL-'], datetime.date, 'Pendiente', OjetosCarrito, values['-EXTRAS-'], random.randint(0, 999999999))
+                    ticket = it.Ticket(values['-CONTROL-'], datetime.datetime.now(), 'Abierto', OjetosCarrito, values['-EXTRAS-'], random.randint(0, 999999999))
                     print(ticket)
                     ticket_manager.agregar_ticket(ticket)
 
@@ -358,15 +358,17 @@ def VentanaUsuario():
 
 def VentanaTicketsAbiertos():
     # Muestra los tickets abiertos
-    ticket_manager.actualizar_tickets()
+    ticket_manager.cargar_tickets()
     ticketsAbiertos = []
+
     for ticket in ticket_manager.tickets:
         if ticket.estado == 'Abierto':
-            ticketsAbiertos.append( f"Ticket {ticket.usuario} - {ticket.fecha} {ticket.estado} - {ticket.items}")
+            #ticket.id,ticket.items, ticket.fecha, ticket.usuario, ticket.estado
+            ticketsAbiertos.append(f"Ticket: {ticket.id} - Fecha: {ticket.fecha} - Usuario: {ticket.usuario} - Estado: {ticket.estado}")
 
     layoutTicketsAbiertos = [
         [sg.Text('Tickets Abiertos', font='Any 15')],
-        [sg.Listbox(values=ticketsAbiertos, size=(50, 10), key='-TICKETS-')],
+        [sg.Listbox(values=ticketsAbiertos, size=(80, 10), key='-TICKETS-', sbar_width=10)],
         [sg.Button('Seleccionar', key='-SELECCIONAR-'), sg.Button('Cancelar', key='-CANCELAR-')]
     ]
     VentanaTicketsAbiertos = sg.Window('Tickets Abiertos', layoutTicketsAbiertos, modal=True)
@@ -388,10 +390,10 @@ def VentanaTicketsAbiertos():
 
 def VentanaTicketEdit(ticketSeleccionado):
     # Muestra la info de un ticket para poder modificarlo
+    print("Ventana Ticket Edit")
     print(ticketSeleccionado)
+    print("Ticket Seleccionado")
     objectoTicket = ticket_manager.mostrar_ticket(ticketSeleccionado)
-
-
     objetosEnTicket = objectoTicket[3].split(',')
     layoutTicket = [
         [sg.Text('Ticket', font='Any 15')],
@@ -400,10 +402,7 @@ def VentanaTicketEdit(ticketSeleccionado):
         [sg.Text('Estado: '), sg.Text(objectoTicket[2])],
         [sg.Text('Objetos: '), sg.Listbox(objetosEnTicket, size=(50, 20), key='-OBJETOS-')],
         [sg.Text('Extras: '), sg.Text(objectoTicket[4])],
-        [sg.Button('Cerrar Ticket', key='-CERRAR-'), sg.Button('Cancelar', key='-CANCELAR-')]
-        #Introductir el codigo de barras para borrar objetos del ticket
-        [sg.Text('Codigo de Barras: '), sg.Input(key='-CODIGO-')],
-        [sg.Button('Borrar Objeto', key='-BORRAR-')]
+        [sg.Button('Cerrar Ticket', key='-CERRAR-'), sg.Button('Borrar Objeto', key='-BORRAR-'), sg.Button('Cancelar', key='-CANCELAR-')]
     ]
 
     VentanaTicket = sg.Window('Ticket', layoutTicket, modal=True)

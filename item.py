@@ -96,25 +96,11 @@ class TicketManager:
     def agregar_ticket(self, ticket):
         self.tickets.append(ticket)
 
-    def mostrar_tickets_abiertos(self):
-        table = ''
-        for ticket in self.tickets:
-            if ticket.estado == "Abierto":
-                table += f"Ticket: {ticket.usuario} - {ticket.fecha} - {ticket.estado} - {ticket.items} \n"
-        return table
-
-    def mostrar_tickets_cerrados(self):
-
-        table = ''
-        for ticket in self.tickets:
-            if ticket.estado == "Cerrado":
-                table += f"Ticket: {ticket.usuario} - {ticket.fecha} - {ticket.estado} - {ticket.items} \n"
-        return table
 
     def mostrar_tickets(self):
         table = ''
         for ticket in self.tickets:
-            table += f"Ticket: {ticket.usuario} - {ticket.fecha} - {ticket.estado} - {ticket.items} \n"
+            table += f"{ticket.usuario},{ticket.fecha},{ticket.estado},{ticket.items},{ticket.extras},{ticket.id} \n"
         return table
 
     def buscar_ticket(self, usuario):
@@ -128,6 +114,8 @@ class TicketManager:
             if ticket.fecha == fecha:
                 return ticket
         return None
+
+
 
     # Guardar Tickets en CSV
     def guardar_tickets(self):
@@ -146,6 +134,8 @@ class TicketManager:
                 usuario, fecha, estado, items, extras, ident = line.split(',')
                 #     def __init__(self, usuario, fecha, estado, items,extras, id):
                 ticket = Ticket(usuario, fecha, estado, items, extras, ident)
+                self.tickets.append(ticket)
+
 
     def actualizar_tickets(self):
         self.tickets = []
