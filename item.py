@@ -11,17 +11,58 @@ class Item:
         self.estado = estado
         self.tipo = tipo
     
-    def agregar_item(self, nombre, codigo, estado, tipo):
-        self.nombre = nombre
-        self.codigo = codigo
-        self.estado = estado
-        self.tipo = tipo
 
+
+class ItemManager:
+    def __init__(self):
+        self.items = []
+
+    def actualizar_item(self, item, nombre, codigo, estado, tipo):
+        item.nombre = nombre
+        item.codigo = codigo
+        item.estado = estado
+        item.tipo = tipo
+        print("Item actualizado exitosamente")
+
+    def agregar_item(self, item):
         #Agregar al csv
-        with open('inventario.csv', 'a') as file:
-            file.write(f"{self.nombre},{self.codigo},{self.estado},{self.tipo} \n")
+        with open('Inventario.csv', 'a') as file:
+            file.write(f"{item.nombre},{item.codigo},{item.estado},{item.tipo} \n")
+            print("Item agregado exitosamente")
 
-        print(f"Item Agregado: {self.nombre} - {self.codigo} - {self.estado} - {self.tipo}")
+    def cambiar_estado(self, item, estado):
+        item.estado = estado
+        # Actualizar el CSV
+        self.guardar_items()
+        print("Estado cambiado exitosamente")
+
+    def guardar_items(self):
+        print("Guardando Items")
+        with open('Inventario.csv', 'w') as file:
+            for item in self.items:
+                file.write(f"{item.nombre},{item.codigo},{item.estado},{item.tipo} \n")
+
+    def actualizar_items(self):
+        self.items = []
+        self.cargar_items()
+
+    def mostrar_items(self):
+        table = ''
+        for item in self.items:
+            table += f"Item: {item.nombre} - {item.codigo} - {item.estado} - {item.tipo} \n"
+        return table
+    
+
+
+
+    def cargar_items(self):
+        print("Cargando Items")
+        with open('Inventario.csv', 'r') as file:
+            for line in file:
+                line = line.strip()
+                nombre, codigo, estado, tipo = line.split(',')
+                item = Item(nombre, codigo, estado, tipo)
+                self.items.append(item)
 
 class Ticket:
     # Usuario del Ticket
@@ -81,5 +122,11 @@ class TicketManager:
                 return ticket
         return None
 
-
-
+    # Guardar Tickets en CSV
+    def guardar_tickets(self):
+        print("Guardando Tickets")
+        with open('Tickets.csv', 'w') as file:
+            for ticket in self.tickets:
+                file.write(f"{ticket.usuario},{ticket.fecha},{ticket.estado},{ticket.items} \n")
+    def cambiar_estado(self, ticket, estado):
+        ticket.estado = estado
